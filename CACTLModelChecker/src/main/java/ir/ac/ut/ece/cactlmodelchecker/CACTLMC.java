@@ -60,15 +60,15 @@ public class CACTLMC {
         allStates.removeAll(satisfyingStates);
         System.out.println("These states do not satisfy the formula:" + allStates);
         boolean retVal = satisfyingStates.containsAll(init);
-        if (!retVal) {
-            for (LinkedList<Item> path : varphi.findCounterExample(null, CLTS, zeta)) {
-                System.out.println("########");
-                for (Item item : path) {
-                    System.out.print(item.state+" ");
-                }
-                System.out.println();
-            }
-        }
+//        if (!retVal) {
+//            for (LinkedList<Item> path : varphi.findCounterExample(null, CLTS, zeta)) {
+//                System.out.println("########");
+//                for (Item item : path) {
+//                    System.out.print(item.state+" ");
+//                }
+//                System.out.println();
+//            }
+//        }
         return retVal;
     }
 
