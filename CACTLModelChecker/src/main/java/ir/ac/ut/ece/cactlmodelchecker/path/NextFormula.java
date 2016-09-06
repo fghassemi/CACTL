@@ -31,7 +31,7 @@ public class NextFormula extends UntilFormula {
     @Override
     public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
         System.out.println("Verifying E" + this.toString() + " is started");
-        Set<String> T2 = phi2.findState(null, CLTS, zeta);
+        Set<String> T2 = phi2.findState(null, CLTS, zeta, false);
         //making the set of states for backward checking
         Set<String> result = new HashSet<String>();
         //this case should be done in case phi2 or chi2 is not false

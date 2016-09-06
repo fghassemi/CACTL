@@ -34,7 +34,7 @@ public class UntilFormula extends PathFormula {
 
     @Override
     public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem InitialCLTS, NetworkConstraint zeta) {
-        Set<String> T = phi1.findState(null, InitialCLTS, zeta);
+        Set<String> T = phi1.findState(null, InitialCLTS, zeta, false);
         //when initial is not empty, T should include initials, otherwise null is returned
         Set<String> copy_of_T = new HashSet<String>(T);
         if (initial != null) {
@@ -43,7 +43,7 @@ public class UntilFormula extends PathFormula {
         if (initial != null && !initial.isEmpty() && copy_of_T.isEmpty()) {
             return null;
         }
-        Set<String> T2 = phi2.findState(null, InitialCLTS, zeta);
+        Set<String> T2 = phi2.findState(null, InitialCLTS, zeta, false);
         //working on the copy of input CLTS
         //ConstraintLabeledTransitionSystem CLTS = new ConstraintLabeledTransitionSystem(InitialCLTS);
         //generating a new CLTS that all its states satisfy \phi1 and transitions satisfy \chi1 and conform to zeta

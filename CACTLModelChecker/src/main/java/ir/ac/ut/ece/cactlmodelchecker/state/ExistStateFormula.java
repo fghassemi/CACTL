@@ -26,7 +26,7 @@ public class ExistStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
         return arg.findState(initial, CLTS, zeta);
     }
 

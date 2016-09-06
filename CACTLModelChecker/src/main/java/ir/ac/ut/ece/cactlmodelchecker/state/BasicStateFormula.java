@@ -25,7 +25,7 @@ public class BasicStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
         if (val) {
             if ((initial == null) || initial.isEmpty()) {
                 return CLTS.vertexSet();

@@ -28,11 +28,11 @@ public class AndStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
         //System.out.println("Computing ");//+this+"....");
-        Set<String> T1 = arg1.findState(initial, CLTS, zeta);
+        Set<String> T1 = arg1.findState(initial, CLTS, zeta, false);
         //System.out.println(arg1+" is satisfied by "+T1+" under "+zeta+" for initial "+initial);
-        Set<String> T2 = arg2.findState(initial, CLTS, zeta);
+        Set<String> T2 = arg2.findState(initial, CLTS, zeta, false);
         //System.out.println(arg2+" is satisfied by "+T2+" under "+zeta+" for initial "+initial);
         if (T1 != null && T2 != null) {
             T1.retainAll(T2);
