@@ -53,7 +53,7 @@ public class CACTLMC {
             NetworkConstraint zeta) {
         Set<String> init = CLTS.InitialStates();
         Set<String> allStates = new HashSet(CLTS.vertexSet());
-        Set<String> satisfyingStates = varphi.findState(null, CLTS, zeta, false);
+        Set<String> satisfyingStates = varphi.findState(null, CLTS, zeta, false, null);
         System.out.println("The formula " + varphi + " is verified by states " + satisfyingStates);
     	//satisfyingStates.retainAll(init);
         //System.out.println("do all states satisfy the formula? "+satisfyingStates.containsAll(allStates));

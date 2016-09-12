@@ -28,9 +28,9 @@ public class OrStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
-        Set<String> T1 = arg1.findState(initial, CLTS, zeta, false);
-        Set<String> T2 = arg2.findState(initial, CLTS, zeta, false);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        Set<String> T1 = arg1.findState(initial, CLTS, zeta, false, depthIndicator);
+        Set<String> T2 = arg2.findState(initial, CLTS, zeta, false, depthIndicator);
         if (T1 == null) {
             T1 = T2;
         }

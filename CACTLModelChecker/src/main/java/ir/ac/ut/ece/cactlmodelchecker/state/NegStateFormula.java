@@ -27,9 +27,9 @@ public class NegStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
         Set<String> states = new HashSet<String>(CLTS.vertexSet());
-        Set<String> neg_states = arg.findState(null, CLTS, zeta, false);
+        Set<String> neg_states = arg.findState(null, CLTS, zeta, false, depthIndicator);
         if (neg_states != null) {
             states.removeAll(neg_states);
         }

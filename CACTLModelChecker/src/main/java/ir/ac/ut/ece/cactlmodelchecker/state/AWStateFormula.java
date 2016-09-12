@@ -32,14 +32,14 @@ public class AWStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
-        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, false);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, false, depthIndicator);
         if (T1 == null) {
             return null;
         }
         Set<String> negT1 = new HashSet<String>(CLTS.vertexSet());
         negT1.removeAll(T1);
-        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, false);
+        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, false, depthIndicator);
         //when initial is not empty, T1 should include initials, otherwise null is returned
         Set<String> copy_of_T1 = new HashSet<String>(T1);
         if (initial != null) {

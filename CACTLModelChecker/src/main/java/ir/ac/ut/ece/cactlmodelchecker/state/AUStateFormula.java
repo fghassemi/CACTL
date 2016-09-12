@@ -40,14 +40,17 @@ public class AUStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
-        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, counterExampleMode);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        String fileName = depthIndicator.depth.toString();
+        depthIndicator.incrementDepth();
+        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, counterExampleMode, depthIndicator);
         if (T1 == null) {
             return null;
         }
         Set<String> negT1 = new HashSet<String>(CLTS.vertexSet());
         negT1.removeAll(T1);
-        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, counterExampleMode);
+        depthIndicator.incrementDepth();
+        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, counterExampleMode, depthIndicator);
         Set<String> negT2 = new HashSet<String>(CLTS.vertexSet());
         negT2.removeAll(T2);
         Set<String> negT1T2 = new HashSet<String>(negT1);
@@ -137,7 +140,7 @@ public class AUStateFormula implements StateFormula {
                 }
             }
         }
-        Set<Item> counterExamples = new HashSet<>();
+        Set<CounterExample> counterExamples = new HashSet<>();
         while (!end.isEmpty()) {
             // choose e \in start
             String c0 = end.iterator().next();
@@ -153,10 +156,13 @@ public class AUStateFormula implements StateFormula {
             }
             stack.push(new Item(c0, topo));
             //System.out.println("backward analysis starts at" + c0);
-            Item lastItemInBackwardAnalysis = null;
+            String lastStateInBackwardAnalysis = null, firstStateInBackwardAnalysis = null;
             while (!stack.isEmpty()) {
                 Item item = stack.pop();
-                lastItemInBackwardAnalysis = item;
+                lastStateInBackwardAnalysis = item.state;
+                if (firstStateInBackwardAnalysis == null) {
+                    firstStateInBackwardAnalysis = item.state;
+                }
                 //add to violate : no need as we use range of visited
 //                if (item.state.equals("0")) {
 //                    System.out.println("nahaaara");
@@ -196,22 +202,22 @@ public class AUStateFormula implements StateFormula {
                 }
             } //end of backward analysis
             if (counterExampleMode) {
-                if (T1.contains(lastItemInBackwardAnalysis.state)) {
-                    Item previouslyVisitedState = null;
-                    for (Item item : counterExamples) {
-                        if (item.state.equals(lastItemInBackwardAnalysis.state)) {
-                            previouslyVisitedState = item;
+                if (T1.contains(lastStateInBackwardAnalysis)) {
+                    Set<Integer> newTopologies = null;
+                    for (CounterExample counterExample : counterExamples) {
+                        if (counterExample.first.equals(lastStateInBackwardAnalysis)) {
+                            newTopologies = counterExample.topologies;
                             break;
                         }
                     }
-                    if (previouslyVisitedState == null) {
+                    if (newTopologies == null) {
                         // if state isn't previously visited, we simply add a new
                         // item with the calculated topologies
-                        counterExamples.add(new Item(lastItemInBackwardAnalysis.state, topo));
+                        counterExamples.add(new CounterExample(lastStateInBackwardAnalysis, firstStateInBackwardAnalysis, topo));
                     } else {
                         // if we have visited this state before, then we need to
                         // calculate the union of their topologies
-                        previouslyVisitedState.topo.addAll(topo);
+                        newTopologies.addAll(topo);
                     }
                 }
             }
@@ -219,7 +225,7 @@ public class AUStateFormula implements StateFormula {
 
         if (counterExampleMode) {
             Gson gson = new Gson();
-            writeOnDisk(gson.toJson(counterExamples), "", FILE_PATH);// TODO do something about the unique filenames
+            writeOnDisk(gson.toJson(counterExamples), fileName, FILE_PATH);// TODO do something about the unique filenames
         }
 
         Set<String> result = new HashSet<String>();

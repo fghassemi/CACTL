@@ -28,8 +28,8 @@ public class ImplyStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
-        Set<String> T1 = new OrStateFormula(new NegStateFormula(arg1), arg2).findState(initial, CLTS, zeta, false);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        Set<String> T1 = new OrStateFormula(new NegStateFormula(arg1), arg2).findState(initial, CLTS, zeta, false, depthIndicator);
         return T1;
     }
 

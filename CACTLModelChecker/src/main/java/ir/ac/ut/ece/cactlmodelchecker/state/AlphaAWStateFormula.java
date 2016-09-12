@@ -33,11 +33,11 @@ public class AlphaAWStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode) {
-        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, false);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        Set<String> T1 = arg.phi1.findState(null, CLTS, zeta, false, depthIndicator);
         Set<String> negT1 = new HashSet<String>(CLTS.vertexSet());
         negT1.removeAll(T1);
-        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, false);
+        Set<String> T2 = arg.phi2.findState(null, CLTS, zeta, false, depthIndicator);
         //phi2 can be a false formula , specially in AG
         Set<String> negT2 = new HashSet<String>(CLTS.vertexSet());
         if (T2 != null) {
