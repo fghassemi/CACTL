@@ -91,6 +91,8 @@ public class UntilFormula extends PathFormula {
                         backwards.add(t);
                         //htb.put(t,new Tag(tr.label.nc,s,htb.get(s)) );
                     }
+                } else if (/* should be montabegh with z?*/T.contains(t)) {
+                    
                 }
             }
         }
