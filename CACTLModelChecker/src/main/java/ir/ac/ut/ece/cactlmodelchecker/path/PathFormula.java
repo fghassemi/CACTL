@@ -5,14 +5,18 @@
  */
 package ir.ac.ut.ece.cactlmodelchecker.path;
 
+import com.google.gson.Gson;
 import ir.ac.ut.ece.cactlmodelchecker.state.BasicStateFormula;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.Pair;
 import ir.ac.ut.ece.cactlmodelchecker.action.ActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
 import ir.ac.ut.ece.cactlmodelchecker.topology.TopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.utils.IOUtils;
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -111,7 +115,7 @@ public abstract class PathFormula {
         }
     }
 
-    public abstract Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta);
+    public abstract Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator);
 
     public boolean OverInvalidPath(NetworkConstraint temp) {
         // returns true if temp is an invalid path for mu
@@ -218,6 +222,50 @@ public abstract class PathFormula {
             l.update(tr.label.nc);
         }
         return l;
+    }
+    
+    protected void generateCounterExamplesCLTSAndSaveIt(ConstraintLabeledTransitionSystem InitialCLTS, Set<String> visited, Set<String> T, NetworkConstraint zeta, String fileName) {
+        /*
+        backwards = clts / visited
+        from backwards, while its not empty
+        pop one and add it to new clts
+        also add its incoming transitions to the new clts, and the edges
+        and the states that do not have any incoming edge, they are 
+        included in the initial states of the counterExamplesCLTS
+        */
+        Set<String> backwardStates = new HashSet<>(InitialCLTS.vertexSet());
+        Set<String> counterExamplesStates = new HashSet<>();
+        Set<LabeledTransition> counterExamplesTransitions = new HashSet<>();
+        Set<String> counterExamplesInitialStates = new HashSet<>();
+        backwardStates.removeAll(visited);
+        while (!backwardStates.isEmpty()) {
+            String s = backwardStates.iterator().next();
+            backwardStates.remove(s);
+            counterExamplesStates.add(s);
+            Set<LabeledTransition> trans_t = InitialCLTS.incomingEdgesOf(s);
+            /* If there are no incoming edges to this state, then
+               it is one of our initial states. */
+            if (trans_t.isEmpty()) {
+                counterExamplesInitialStates.add(s);
+            }
+            
+            //for all (t,(c,a),s)\in CLTS.Trans that t|= phi1 and (a|= \chi_1 or (c={} and a=tau)))
+            for (Iterator<LabeledTransition> j = trans_t.iterator(); j.hasNext();) {
+                LabeledTransition tr = j.next();
+                String t = tr.getSrc();
+                if (T.contains(t) && chi1.satisfy(new StringActionFormula(tr.label.act)) && zeta.conforms(tr.label.nc)) {
+                    if (!visited.contains(t)) {
+                        backwardStates.add(t);
+                        counterExamplesTransitions.add(tr);
+                    }
+                }
+            }
+        }
+        ConstraintLabeledTransitionSystem counterExamplesCLTS =
+                new ConstraintLabeledTransitionSystem(
+                        counterExamplesTransitions, counterExamplesStates, counterExamplesInitialStates);
+        Gson gson = new Gson();
+        IOUtils.writeOnDisk(gson.toJson(counterExamplesCLTS), fileName, IOUtils.FILE_DIRECTORY);
     }
     
 }

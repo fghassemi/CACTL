@@ -14,6 +14,7 @@ import ir.ac.ut.ece.cactlmodelchecker.action.BasicActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
 import ir.ac.ut.ece.cactlmodelchecker.topology.BasicTopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -29,7 +30,7 @@ public class NextFormula extends UntilFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
         System.out.println("Verifying E" + this.toString() + " is started");
         Set<String> T2 = phi2.findState(null, CLTS, zeta, false, null);
         //making the set of states for backward checking

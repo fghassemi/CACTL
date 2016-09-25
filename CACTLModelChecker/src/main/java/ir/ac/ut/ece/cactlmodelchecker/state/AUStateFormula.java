@@ -5,6 +5,7 @@
  */
 package ir.ac.ut.ece.cactlmodelchecker.state;
 
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import com.google.gson.Gson;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
@@ -13,15 +14,10 @@ import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.SCCInspector;
 import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.path.UntilFormula;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Serializable;
+import ir.ac.ut.ece.cactlmodelchecker.utils.IOUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.Stack;
 
@@ -32,8 +28,6 @@ import java.util.Stack;
 public class AUStateFormula implements StateFormula {
 
     public UntilFormula arg;
-
-    public static final String FILE_PATH = "/home/ashkan/"; // TODO should be refactored and changed to a relative path!
 
     public AUStateFormula(UntilFormula _arg) {
         arg = _arg;
@@ -65,8 +59,8 @@ public class AUStateFormula implements StateFormula {
         }
         //find (x,phi) transitions while states with a non-(x,phi) and non-(x',phi') transition become deadlock
         // this implements clean
-        Set<LabeledTransition> CCSTrans = new HashSet<LabeledTransition>();
-        Set<String> EXCCSStates = new HashSet<String>();
+        Set<LabeledTransition> SCCTrans = new HashSet<LabeledTransition>();
+        Set<String> EXSCCStates = new HashSet<String>();
         boolean hasBadTrans = false;
         for (Iterator<String> si = T1.iterator(); si.hasNext();) {
             String s = si.next();
@@ -78,7 +72,7 @@ public class AUStateFormula implements StateFormula {
                 String dst = tr.getDst();
                 if (zeta.conforms(tr.label.nc)) {
                     if (T2.contains(dst) && arg.chi2.satisfy(new StringActionFormula(tr.label.act))) {
-                        EXCCSStates.add(s);
+                        EXSCCStates.add(s);
                     } else if (T1.contains(dst) && arg.chi1.satisfy(new StringActionFormula(tr.label.act))) {
                         tempCCSTrans.add(tr);
                     } else {
@@ -87,11 +81,11 @@ public class AUStateFormula implements StateFormula {
                 }
             }
             if (!hasBadTrans) {
-                CCSTrans.addAll(tempCCSTrans);
+                SCCTrans.addAll(tempCCSTrans);
             }
         }
         //generating a new CLTS that all its states satisfy \phi1 and transitions satisfy \chi1 and conform to zeta
-        ConstraintLabeledTransitionSystem filteredCLTS = new ConstraintLabeledTransitionSystem(CCSTrans, T1, CLTS.InitialStates());
+        ConstraintLabeledTransitionSystem filteredCLTS = new ConstraintLabeledTransitionSystem(SCCTrans, T1, CLTS.InitialStates());
         SCCInspector inspector = new SCCInspector(filteredCLTS);
         Set<String>[] SCCs = inspector.ComputeSCCc();
         //making the set of states that a valid path should end in
@@ -107,7 +101,7 @@ public class AUStateFormula implements StateFormula {
             NetworkConstraint acc = new NetworkConstraint();
             for (Iterator<String> si = s_sg.iterator(); si.hasNext() && !hasAUState && terminal;) {
                 String s = si.next();
-                if (EXCCSStates.contains(s)) {
+                if (EXSCCStates.contains(s)) {
                     hasAUState = true;
                 } else {
                     Set<LabeledTransition> trans = filteredCLTS.outgoingEdgesOf(s);
@@ -123,7 +117,7 @@ public class AUStateFormula implements StateFormula {
                 }
             }
             if (!hasAUState && terminal && !arg.OverInvalidPath(acc)) {
-                // a (chi,phi)-CCS with no (chi',phi') state
+                // a (chi,phi)-SCC with no (chi',phi') state
                 Set<Integer> validTopo = new HashSet<Integer>();
                 for (Iterator<Integer> topoi = arg.rtopologies.iterator(); topoi.hasNext();) {
                     Integer i = topoi.next();
@@ -140,7 +134,13 @@ public class AUStateFormula implements StateFormula {
                 }
             }
         }
-        Set<CounterExample> counterExamples = new HashSet<>();
+
+        /* for counter example mode purposes only */
+        Set<CounterExample> counterExamples = new HashSet<>();// TODO rename this!
+        Set<LabeledTransition> counterExamplesLabeledTransitions = new HashSet<>();
+        Set<String> counterExamplesInitialStates = new HashSet<>();
+        Set<String> counterExamplesStates = new HashSet<>();
+
         while (!end.isEmpty()) {
             // choose e \in start
             String c0 = end.iterator().next();
@@ -156,10 +156,13 @@ public class AUStateFormula implements StateFormula {
             }
             stack.push(new Item(c0, topo));
             //System.out.println("backward analysis starts at" + c0);
+            Set<String> visitedStatesInBackwardAnalysis = new HashSet<>();
+            Set<LabeledTransition> transitions = new HashSet<>();
             String lastStateInBackwardAnalysis = null, firstStateInBackwardAnalysis = null;
             while (!stack.isEmpty()) {
                 Item item = stack.pop();
                 lastStateInBackwardAnalysis = item.state;
+                visitedStatesInBackwardAnalysis.add(item.state);
                 if (firstStateInBackwardAnalysis == null) {
                     firstStateInBackwardAnalysis = item.state;
                 }
@@ -170,6 +173,7 @@ public class AUStateFormula implements StateFormula {
 //                    System.out.println("over the path" + item.state);
 //                }
                 Set<LabeledTransition> tr = filteredCLTS.incomingEdgesOf(item.state);
+                transitions.addAll(tr);
                 for (Iterator<LabeledTransition> it = tr.iterator(); it.hasNext();) {
                     LabeledTransition tt = it.next();
                     String src = tt.getSrc();
@@ -205,7 +209,7 @@ public class AUStateFormula implements StateFormula {
                 if (T1.contains(lastStateInBackwardAnalysis)) {
                     Set<Integer> newTopologies = null;
                     for (CounterExample counterExample : counterExamples) {
-                        if (counterExample.first.equals(lastStateInBackwardAnalysis)) {
+                        if (counterExample.initial.equals(lastStateInBackwardAnalysis)) {
                             newTopologies = counterExample.topologies;
                             break;
                         }
@@ -219,13 +223,22 @@ public class AUStateFormula implements StateFormula {
                         // calculate the union of their topologies
                         newTopologies.addAll(topo);
                     }
+                    counterExamplesLabeledTransitions.addAll(transitions);
+                    counterExamplesInitialStates.add(lastStateInBackwardAnalysis);
+                    counterExamplesStates.addAll(visitedStatesInBackwardAnalysis);
                 }
             }
         }
 
         if (counterExampleMode) {
+            ConstraintLabeledTransitionSystem counterExamplesCLTS
+                    = new ConstraintLabeledTransitionSystem(
+                            counterExamplesLabeledTransitions, counterExamplesStates, counterExamplesInitialStates);
+            Object[] counterExamplesData = new Object[2];
+            counterExamplesData[0] = counterExamplesCLTS;
+            counterExamplesData[1] = counterExamples;
             Gson gson = new Gson();
-            writeOnDisk(gson.toJson(counterExamples), fileName, FILE_PATH);
+            IOUtils.writeOnDisk(gson.toJson(counterExamplesData), fileName, IOUtils.FILE_DIRECTORY);
         }
 
         Set<String> result = new HashSet<String>();
@@ -250,24 +263,8 @@ public class AUStateFormula implements StateFormula {
 
     @Override
     public Set<Item> findCounterExample(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) { // TODO implement!
-        
-        return null;
-    }
 
-    public static void writeOnDisk(String content, String fileName, String path) {
-        try {
-            File file = new File(path + fileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(content);
-            bw.close();
-        } catch (IOException ex) {
-            throw new RuntimeException("Couldn't write the content on disk, "
-                    + "an exception occured while doing so", ex);
-        }
+        return null;
     }
 
 }

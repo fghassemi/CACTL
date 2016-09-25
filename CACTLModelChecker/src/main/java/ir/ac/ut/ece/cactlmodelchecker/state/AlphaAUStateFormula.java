@@ -5,6 +5,7 @@
  */
 package ir.ac.ut.ece.cactlmodelchecker.state;
 
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.Label;

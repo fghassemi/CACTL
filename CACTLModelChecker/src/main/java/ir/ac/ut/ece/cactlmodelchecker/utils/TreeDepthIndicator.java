@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ir.ac.ut.ece.cactlmodelchecker.state;
+package ir.ac.ut.ece.cactlmodelchecker.utils;
 
 import java.io.Serializable;
 

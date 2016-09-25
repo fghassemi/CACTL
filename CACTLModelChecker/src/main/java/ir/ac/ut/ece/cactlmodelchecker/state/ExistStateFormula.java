@@ -5,13 +5,11 @@
  */
 package ir.ac.ut.ece.cactlmodelchecker.state;
 
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.path.PathFormula;
-import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -19,6 +17,7 @@ import java.util.Set;
  * @author ashkan
  */
 public class ExistStateFormula implements StateFormula {
+
     public PathFormula arg;
 
     public ExistStateFormula(PathFormula _arg) {
@@ -27,7 +26,7 @@ public class ExistStateFormula implements StateFormula {
 
     @Override
     public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
-        return arg.findState(initial, CLTS, zeta);
+        return arg.findState(initial, CLTS, zeta, counterExampleMode, depthIndicator);
     }
 
     public String toString() {
@@ -43,5 +42,5 @@ public class ExistStateFormula implements StateFormula {
     public Set<Item> findCounterExample(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
 }

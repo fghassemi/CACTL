@@ -13,11 +13,11 @@ import java.util.Set;
  * @author ashkan
  */
 public class CounterExample implements Serializable {
-    public String first, last;
+    public String initial, last;
     public Set<Integer> topologies;
 
-    public CounterExample(String first, String last, Set<Integer> topologies) {
-        this.first = first;
+    public CounterExample(String initial, String last, Set<Integer> topologies) {
+        this.initial = initial;
         this.last = last;
         this.topologies = topologies;
     }

@@ -5,6 +5,7 @@
  */
 package ir.ac.ut.ece.cactlmodelchecker.path;
 
+import com.google.gson.Gson;
 import ir.ac.ut.ece.cactlmodelchecker.state.BasicStateFormula;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
@@ -13,6 +14,8 @@ import ir.ac.ut.ece.cactlmodelchecker.action.ActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
 import ir.ac.ut.ece.cactlmodelchecker.topology.TopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.utils.IOUtils;
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -33,8 +36,10 @@ public class UntilFormula extends PathFormula {
     }
 
     @Override
-    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem InitialCLTS, NetworkConstraint zeta) {
-        Set<String> T = phi1.findState(null, InitialCLTS, zeta, false, null);
+    public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem InitialCLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator) {
+        String fileName = depthIndicator.depth.toString();
+        depthIndicator.incrementDepth();
+        Set<String> T = phi1.findState(null, InitialCLTS, zeta, counterExampleMode, depthIndicator);
         //when initial is not empty, T should include initials, otherwise null is returned
         Set<String> copy_of_T = new HashSet<String>(T);
         if (initial != null) {
@@ -43,7 +48,8 @@ public class UntilFormula extends PathFormula {
         if (initial != null && !initial.isEmpty() && copy_of_T.isEmpty()) {
             return null;
         }
-        Set<String> T2 = phi2.findState(null, InitialCLTS, zeta, false, null);
+        depthIndicator.incrementDepth();
+        Set<String> T2 = phi2.findState(null, InitialCLTS, zeta, counterExampleMode, depthIndicator);
         //working on the copy of input CLTS
         //ConstraintLabeledTransitionSystem CLTS = new ConstraintLabeledTransitionSystem(InitialCLTS);
         //generating a new CLTS that all its states satisfy \phi1 and transitions satisfy \chi1 and conform to zeta
@@ -91,12 +97,15 @@ public class UntilFormula extends PathFormula {
                         backwards.add(t);
                         //htb.put(t,new Tag(tr.label.nc,s,htb.get(s)) );
                     }
-                } else if (/* should be montabegh with z?*/T.contains(t)) {
-                    
                 }
             }
         }
-        // finish of backward analysis
+        // end of backward analysis
+        
+        if (counterExampleMode) {
+            this.generateCounterExamplesCLTSAndSaveIt(InitialCLTS, visited, T, zeta, fileName);
+        }
+        
         return visited;
     }
 
