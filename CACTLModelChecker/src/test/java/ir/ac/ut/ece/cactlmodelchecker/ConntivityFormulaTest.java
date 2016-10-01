@@ -1,6 +1,6 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.topology.ConntivityFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.ConntivityFormula;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;

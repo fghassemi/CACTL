@@ -1,18 +1,18 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.action.NegActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.OrActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.path.UnlessFormula;
-import ir.ac.ut.ece.cactlmodelchecker.path.UntilFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.AUStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.AWStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.BasicStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.topology.AndTopologyFormula;
-import ir.ac.ut.ece.cactlmodelchecker.topology.BasicTopologyFormula;
-import ir.ac.ut.ece.cactlmodelchecker.topology.ConntivityFormula;
-import ir.ac.ut.ece.cactlmodelchecker.topology.TopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.NegActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.OrActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.StringActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.path.UnlessFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.path.UntilFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.AUStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.AWStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.BasicStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.StateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.AndTopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.BasicTopologyFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.ConntivityFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.TopologyFormula;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;

@@ -1,14 +1,14 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.action.ActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.AndActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.BasicActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.NegActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.path.PathFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.AndStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.BasicStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.NegStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.ActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.AndActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.BasicActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.NegActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.path.PathFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.AndStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.BasicStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.NegStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.StateFormula;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 

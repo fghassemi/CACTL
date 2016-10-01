@@ -3,7 +3,7 @@ package ir.ac.ut.ece.cactlmodelchecker;
 import java.io.Serializable;
 import java.util.*;
 
-public class Item implements Serializable, StateBehaviour {
+public class Item implements Serializable {
 
     public String state;
     public Set<Integer> topo;

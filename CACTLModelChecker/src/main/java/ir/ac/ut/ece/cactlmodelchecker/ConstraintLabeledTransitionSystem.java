@@ -1,7 +1,7 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.action.ActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.action.StringActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.ActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.StringActionFormula;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;

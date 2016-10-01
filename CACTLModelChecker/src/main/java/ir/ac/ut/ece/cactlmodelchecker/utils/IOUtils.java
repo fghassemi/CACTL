@@ -7,8 +7,12 @@ package ir.ac.ut.ece.cactlmodelchecker.utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,7 +33,17 @@ public class IOUtils {
             bw.write(content);
             bw.close();
         } catch (IOException ex) {
-            throw new RuntimeException("Couldn't write the content on disk, " + "an exception occured while doing so", ex);
+            throw new RuntimeException("Couldn't write the content on disk, " + 
+                    "an exception occured while doing so", ex);
+        }
+    }
+    
+    public static String readFile(String fileName, String path) {
+        try {
+            return new Scanner(new File(path+fileName)).useDelimiter("\\Z").next();
+        } catch (FileNotFoundException ex) {
+            throw new RuntimeException("Couldn't read the file from disk, " + 
+                    "an exception occured while doing so", ex);
         }
     }
     

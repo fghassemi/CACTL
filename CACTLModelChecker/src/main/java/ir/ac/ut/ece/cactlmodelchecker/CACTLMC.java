@@ -1,6 +1,6 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.StateFormula;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

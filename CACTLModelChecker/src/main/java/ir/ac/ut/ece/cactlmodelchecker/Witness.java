@@ -1,6 +1,6 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
-import ir.ac.ut.ece.cactlmodelchecker.state.StateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.StateFormula;
 
 public interface Witness {
 

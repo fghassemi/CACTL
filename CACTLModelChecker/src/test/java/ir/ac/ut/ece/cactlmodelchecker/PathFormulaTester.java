@@ -1,10 +1,10 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
 
-import ir.ac.ut.ece.cactlmodelchecker.action.BasicActionFormula;
-import ir.ac.ut.ece.cactlmodelchecker.path.UntilFormula;
-import ir.ac.ut.ece.cactlmodelchecker.state.BasicStateFormula;
-import ir.ac.ut.ece.cactlmodelchecker.topology.ConntivityFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.action.BasicActionFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.path.UntilFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.state.BasicStateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.formula.topology.ConntivityFormula;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
