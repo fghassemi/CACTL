@@ -7,12 +7,14 @@ package ir.ac.ut.ece.cactlmodelchecker.formula.state;
 
 import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.SCCInspector;
+import ir.ac.ut.ece.cactlmodelchecker.SCCInspectorForUntidyGraphs;
 import ir.ac.ut.ece.cactlmodelchecker.formula.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.formula.path.UntilFormula;
 import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
@@ -33,6 +35,11 @@ import java.util.Stack;
  * @author ashkan
  */
 public class AUStateFormula implements StateFormula {
+
+    protected static final String TOPOLOGIES_MAP_POSTFIX = "-topologiesMap";
+    protected static final String STATES_POSTFIX = "-states";
+    protected static final String INITIAL_STATES_POSTFIX = "-initialStates";
+    protected static final String TRANSITIONS_POSTFIX = "-transitions";
 
     public UntilFormula arg;
 
@@ -144,7 +151,7 @@ public class AUStateFormula implements StateFormula {
 
         /* for counter example mode purposes only */
         HashMap<String, Set<Integer>> topologiesMap = new HashMap<>();// TODO rename this!
-        Set<LabeledTransition> counterExamplesLabeledTransitions = new HashSet<>();
+        Set<LabeledTransition> allTransitionsInTheWay = new HashSet<>();
         Set<String> counterExamplesInitialStates = new HashSet<>();
         Set<String> counterExamplesStates = new HashSet<>();
 
@@ -177,12 +184,7 @@ public class AUStateFormula implements StateFormula {
 //                    System.out.println("over the path" + item.state);
 //                }
                 Set<LabeledTransition> tr = filteredCLTS.incomingEdgesOf(item.state);
-                for (LabeledTransition transition : tr) {
-                    if (visitedStatesInBackwardAnalysis.contains(transition.getSrc()) &&
-                            visitedStatesInBackwardAnalysis.contains(transition.getDst())) {
-                        transitions.add(transition);
-                    }
-                }
+                transitions.addAll(tr);
                 for (Iterator<LabeledTransition> it = tr.iterator(); it.hasNext();) {
                     LabeledTransition tt = it.next();
                     String src = tt.getSrc();
@@ -232,7 +234,7 @@ public class AUStateFormula implements StateFormula {
                         // calculate the union of their topologies
                         newTopologies.addAll(topo);
                     }
-                    counterExamplesLabeledTransitions.addAll(transitions);
+                    allTransitionsInTheWay.addAll(transitions);
                     counterExamplesInitialStates.add(lastStateInBackwardAnalysis);
                     counterExamplesStates.addAll(visitedStatesInBackwardAnalysis);
                 }
@@ -240,12 +242,18 @@ public class AUStateFormula implements StateFormula {
         }
 
         if (counterExampleMode) {
-            ConstraintLabeledTransitionSystem counterExamplesCLTS
-                    = new ConstraintLabeledTransitionSystem(
-                            counterExamplesLabeledTransitions, counterExamplesStates, counterExamplesInitialStates);
+            Set<LabeledTransition> counterExamplesTransitions = new HashSet<>();
+            for (LabeledTransition transition : allTransitionsInTheWay) {
+                if (counterExamplesStates.contains(transition.getSrc()) &&
+                        counterExamplesStates.contains(transition.getDst())) {
+                    counterExamplesTransitions.add(transition);
+                }
+            }
             Gson gson = new Gson();
-            IOUtils.writeOnDisk(gson.toJson(counterExamplesCLTS), fileName+"-CLTS", IOUtils.FILE_DIRECTORY);
-            IOUtils.writeOnDisk(gson.toJson(topologiesMap), fileName+"-topologiesMap", IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(counterExamplesTransitions), fileName + TRANSITIONS_POSTFIX, IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(counterExamplesInitialStates), fileName + INITIAL_STATES_POSTFIX, IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(counterExamplesStates), fileName + STATES_POSTFIX, IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(topologiesMap), fileName + TOPOLOGIES_MAP_POSTFIX, IOUtils.FILE_DIRECTORY);
         }
 
         Set<String> result = new HashSet<String>();
@@ -271,10 +279,9 @@ public class AUStateFormula implements StateFormula {
     @Override
     public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
         String fileName = depthIndicator.depth.toString();
-        Gson gson = new Gson();
-        ConstraintLabeledTransitionSystem counterExamplesCLTS = gson.fromJson(IOUtils.readFile(fileName+"-CLTS", IOUtils.FILE_DIRECTORY), ConstraintLabeledTransitionSystem.class);
-        Map<String, Set<Integer>> topologiesMap = gson.fromJson(IOUtils.readFile(fileName+"-toplogiesMap", IOUtils.FILE_DIRECTORY), new TypeToken<Map<String, Set<Integer>>>(){}.getType());
-        SCCInspector inspector = new SCCInspector(counterExamplesCLTS);
+        ConstraintLabeledTransitionSystem counterExamplesCLTS = this.loadCLTS(fileName);
+        Map<String, Set<Integer>> topologiesMap = this.loadTopologiesMap(fileName);
+        SCCInspector inspector = new SCCInspectorForUntidyGraphs(counterExamplesCLTS);
         Set<String>[] SCCs = inspector.ComputeSCCc();
         Set<String> leaves = new HashSet<>();
         for (int scc = 0; scc < inspector.count; scc++) {
@@ -290,15 +297,37 @@ public class AUStateFormula implements StateFormula {
                 case StateFormula.DEADLOCK:
                     return findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
                 case StateFormula.NO_VALID_OUTGOING_TRANSITION:
-                    // find the type of the state
-                    // if type one, 
+                // find the type of the state
+                // if type one, 
                 case StateFormula.INFINITE_LOOP:
             }
         }
         return null;
     }
 
+    protected ConstraintLabeledTransitionSystem loadCLTS(String fileName) {
+        Gson gson = new Gson();
+        Set<String> states = gson.fromJson(IOUtils.readFile(fileName + STATES_POSTFIX, IOUtils.FILE_DIRECTORY), new TypeToken<Set<String>>() {
+        }.getType());
+        Set<String> initialStates = gson.fromJson(IOUtils.readFile(fileName + INITIAL_STATES_POSTFIX, IOUtils.FILE_DIRECTORY), new TypeToken<Set<String>>() {
+        }.getType());
+        Set<LabeledTransition> transitions = gson.fromJson(IOUtils.readFile(fileName + TRANSITIONS_POSTFIX, IOUtils.FILE_DIRECTORY), new TypeToken<Set<LabeledTransition>>() {
+        }.getType());
+        return new ConstraintLabeledTransitionSystem(transitions, states, initialStates);
+    }
+
+    protected Map<String, Set<Integer>> loadTopologiesMap(String fileName) {
+        Gson gson = new Gson();
+        return gson.fromJson(IOUtils.readFile(fileName + TOPOLOGIES_MAP_POSTFIX, IOUtils.FILE_DIRECTORY), new TypeToken<Map<String, Set<Integer>>>() {
+        }.getType());
+    }
+
     protected CounterExample findCounterExampleForDeadlockedLeafState(String leafState, Set<String> initialStates, ConstraintLabeledTransitionSystem counterExamplesCLTS, Map<String, Set<Integer>> topologiesMap) {
+        if (initialStates == null) {
+            initialStates = counterExamplesCLTS.InitialStates();
+        }
+        System.out.println("counter ex clts init : " + counterExamplesCLTS.InitialStates());
+        System.out.println("init " + initialStates);
         Set<LabeledTransition> path = new HashSet<>();
         Map<String, LabeledTransition> predecessor = new HashMap<>();
         Set<String> visitedStates = new HashSet<>();

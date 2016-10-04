@@ -15,6 +15,8 @@ public class SCCInspector {
     ConstraintLabeledTransitionSystem CLTS;
     public int count;
 
+    public SCCInspector() {}
+    
     public SCCInspector(ConstraintLabeledTransitionSystem _CLTS) {
         // converts CLTS into its graph
         CLTS = _CLTS;

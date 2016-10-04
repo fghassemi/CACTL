@@ -73,8 +73,7 @@ public class CACTLMC {
     }
 
     public static CounterExample findCounterExample(ConstraintLabeledTransitionSystem CLTS, StateFormula varphi, NetworkConstraint zeta){
-        Set<String> init = CLTS.InitialStates();
-        return varphi.findCounterExample(init, CLTS, zeta, new TreeDepthIndicator(0));
+        return varphi.findCounterExample(null, CLTS, zeta, new TreeDepthIndicator(0));
     }
 
     private static ConstraintLabeledTransitionSystem creatCLTS() {
