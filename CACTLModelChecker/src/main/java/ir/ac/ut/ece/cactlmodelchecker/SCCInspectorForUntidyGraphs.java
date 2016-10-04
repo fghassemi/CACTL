@@ -44,7 +44,7 @@ public class SCCInspectorForUntidyGraphs extends SCCInspector {
                 int src = nameMapToIndex.get(state);
                 if (!nameMapToIndex.containsKey(tr.getDst())) {
                     nameMapToIndex.put(tr.getDst(), index);
-                    indexMapToName.put(index++, state);
+                    indexMapToName.put(index++, tr.getDst());
                 }
                 int dst = nameMapToIndex.get(tr.getDst());
                 // ((Bag)graph.adj(src)).

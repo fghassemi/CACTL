@@ -283,6 +283,9 @@ public class AUStateFormula implements StateFormula {
         Map<String, Set<Integer>> topologiesMap = this.loadTopologiesMap(fileName);
         SCCInspector inspector = new SCCInspectorForUntidyGraphs(counterExamplesCLTS);
         Set<String>[] SCCs = inspector.ComputeSCCc();
+        if (initialStates == null) {
+            initialStates = counterExamplesCLTS.InitialStates();
+        }
         Set<String> leaves = new HashSet<>();
         for (int scc = 0; scc < inspector.count; scc++) {
             Set<String> s_sg = SCCs[scc];
@@ -323,11 +326,6 @@ public class AUStateFormula implements StateFormula {
     }
 
     protected CounterExample findCounterExampleForDeadlockedLeafState(String leafState, Set<String> initialStates, ConstraintLabeledTransitionSystem counterExamplesCLTS, Map<String, Set<Integer>> topologiesMap) {
-        if (initialStates == null) {
-            initialStates = counterExamplesCLTS.InitialStates();
-        }
-        System.out.println("counter ex clts init : " + counterExamplesCLTS.InitialStates());
-        System.out.println("init " + initialStates);
         Set<LabeledTransition> path = new HashSet<>();
         Map<String, LabeledTransition> predecessor = new HashMap<>();
         Set<String> visitedStates = new HashSet<>();
@@ -345,7 +343,7 @@ public class AUStateFormula implements StateFormula {
             for (LabeledTransition edge : incomingEdges) {
                 if (!visitedStates.contains(edge.getSrc())) {
                     predecessor.put(edge.getSrc(), edge);
-                    stack.addFirst(state);
+                    stack.addFirst(edge.getSrc());
                 }
             }
         }
@@ -357,7 +355,7 @@ public class AUStateFormula implements StateFormula {
             counterExamplePath.add(edge);
             stateInPath = edge.getDst();
         }
-        return new CounterExampleWithTopologies(counterExamplePath, topologiesMap.get(initialStateReached));
+        return new CounterExampleWithTopologies(counterExamplePath, initialStateReached, topologiesMap.get(initialStateReached));
     }
 
     private String getType(ConstraintLabeledTransitionSystem counterExamplesCLTS, String state, ConstraintLabeledTransitionSystem initialCLTS) { // check this function

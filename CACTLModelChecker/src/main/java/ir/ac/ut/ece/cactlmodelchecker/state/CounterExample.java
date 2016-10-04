@@ -16,21 +16,31 @@ import java.util.LinkedList;
 public class CounterExample implements Serializable {
 
     LinkedList<LabeledTransition> path;
+    String startingState;
 
-    public CounterExample(LinkedList<LabeledTransition> path) {
+    public CounterExample(LinkedList<LabeledTransition> path, String startingState) {
         this.path = path;
+        this.startingState = startingState;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
+        builder.append("startingState={").append(startingState)
+                .append("}\n");
+        builder.append("path={");
         for (LabeledTransition transition : this.path) {
             if (this.path.indexOf(transition) != this.path.size()-1) {
-                builder.append(transition.toString()).append(',');
+                builder.append('[').append(transition.getSrc()).append(',')
+                        .append(transition.toString()).append(',')
+                        .append(transition.getDst()).append("},");
             } else {
-                builder.append(transition.toString());
+                builder.append('[').append(transition.getSrc()).append(',')
+                        .append(transition.toString()).append(',')
+                        .append(transition.getDst()).append("}");
             }
         }
+        builder.append('}');
         return builder.toString();
     }
 }

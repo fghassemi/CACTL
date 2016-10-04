@@ -17,14 +17,14 @@ public class CounterExampleWithTopologies extends CounterExample {
     
     public Set<Integer> topologies;
     
-    public CounterExampleWithTopologies(LinkedList<LabeledTransition> path, Set<Integer> topologies) {
-        super(path);
+    public CounterExampleWithTopologies(LinkedList<LabeledTransition> path, String startingState, Set<Integer> topologies) {
+        super(path, startingState);
         this.topologies = topologies;
     }
 
     @Override
     public String toString() {
-        return "topologies=" + topologies + '\n' + super.toString();
+        return "topologies={" + topologies + "}\n" + super.toString();
     }
     
 }
