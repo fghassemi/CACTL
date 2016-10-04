@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class IOUtils {
 
-    public static final String FILE_DIRECTORY = "/home/ashkan/"; // TODO should be refactored and changed to a relative path!
+    public static final String FILE_DIRECTORY = "/home/ashkan/CACTLFiles/"; // TODO should be refactored and changed to a relative path!
 
     public static void writeOnDisk(String content, String fileName, String path) {
         try {

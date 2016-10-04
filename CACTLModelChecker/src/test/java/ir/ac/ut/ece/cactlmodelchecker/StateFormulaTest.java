@@ -405,7 +405,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new StringActionFormula("a"), new StringActionFormula("b"), new ConntivityFormula("A", "B"), 3));
-        assertTrue("testing the until path on test case 1 ", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("testing the until path on test case 1 ", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -414,7 +414,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new StringActionFormula("a"), new StringActionFormula("b"), new ConntivityFormula("A", "C"), 3));
-        assertTrue("testing topology on test case 1", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("testing topology on test case 1", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -423,7 +423,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new StringActionFormula("a"), new StringActionFormula("b"), new ConntivityFormula("A", "B"), 3));
-        assertTrue("just a loop on test case 2", !CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("just a loop on test case 2", !CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -432,7 +432,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new StringActionFormula("a"), new StringActionFormula("b"), new ConntivityFormula("A", "C"), 3));
-        assertTrue("loop in middle on test case 3", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("loop in middle on test case 3", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -441,7 +441,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new StringActionFormula("a"), new StringActionFormula("b"), new ConntivityFormula("A", "D"), 4));
-        assertTrue("loop in middle on test case 4", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("loop in middle on test case 4", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -451,7 +451,7 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new OrActionFormula(new StringActionFormula("init"), new StringActionFormula("tau")), new StringActionFormula("succ"),
                         new AndTopologyFormula(new ConntivityFormula("A", "B"), new ConntivityFormula("B", "A")), 2));
-        assertTrue("model of invalid paths", !CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("model of invalid paths", !CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -460,7 +460,7 @@ public class StateFormulaTest {
         StateFormula varphi = new ExistStateFormula(
                 new UntilFormula(new BasicStateFormula(true), new BasicStateFormula(true),
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("A", "B"), 3));
-        assertTrue("finding topology while we have or of action over test case 5", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("finding topology while we have or of action over test case 5", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     //@Test
@@ -473,7 +473,7 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), varphi1,
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("A", "B"), 3));
 
-        assertTrue("nesting exist until formula over test case 5", CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint()));
+        assertTrue("nesting exist until formula over test case 5", CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint(), false));
     }
 
     @Test
@@ -485,7 +485,7 @@ public class StateFormulaTest {
                         new StringActionFormula("succ"),
                         new AndTopologyFormula(new ConntivityFormula("A", "B"), new ConntivityFormula("B", "A")), 2));
 
-        assertTrue("all until formula over test case 7", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint()));
+        assertTrue("all until formula over test case 7", CACTLMC.modelCheck(CLTS, varphi, new NetworkConstraint(), false));
     }
 
     @Test
@@ -498,7 +498,7 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), varphi1,
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("D", "B"), 4));
 
-        assertTrue("nesting two exist until formule over test case 8", CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint()));
+        assertTrue("nesting two exist until formule over test case 8", CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint(), false));
     }
 
     @Test
@@ -511,7 +511,7 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), varphi1,
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("D", "B"), 4));
 
-        assertTrue("nesting an exist until in all formule over test case 8", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint()));
+        assertTrue("nesting an exist until in all formule over test case 8", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint(), false));
     }
 
 //?	@Test
@@ -524,7 +524,7 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), varphi1,
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("A", "B"), 3));
 
-        assertTrue("nesting all and exist until formula over test case 5", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint()));
+        assertTrue("nesting all and exist until formula over test case 5", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint(), false));
     }
 
     @Test
@@ -537,7 +537,8 @@ public class StateFormulaTest {
                 new UntilFormula(new BasicStateFormula(true), varphi1,
                         new OrActionFormula(new StringActionFormula("a"), new StringActionFormula("tau")), new StringActionFormula("b"), new ConntivityFormula("D", "B"), 4));
 
-        assertTrue("nesting two all until formule over test case 8", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint()));
+        assertTrue("nesting two all until formule over test case 8", !CACTLMC.modelCheck(CLTS, varphi2, new NetworkConstraint(), true));
+        System.out.println(CACTLMC.findCounterExample(CLTS, varphi2, new NetworkConstraint()));
     }
 
 }

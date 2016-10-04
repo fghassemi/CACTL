@@ -42,7 +42,7 @@ public class AODV {
                 new OrActionFormula(new StringActionFormula("rec_newpkt(7,2)"), new StringActionFormula("tau")),
                 new StringActionFormula("rec_deliver(7)"), mu1, 4));
 
-        assertTrue("all packets are delivered", CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint()));
+        assertTrue("all packets are delivered", CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint(), false));
 
     }
 
@@ -63,7 +63,7 @@ public class AODV {
                 new StringActionFormula("rec_newpkt(7,2)"),
                 new BasicTopologyFormula(true), 4));
 
-        assertTrue("all packets are delivered", CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint()));
+        assertTrue("all packets are delivered", CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint(), false));
 
     }
 

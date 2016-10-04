@@ -10,6 +10,7 @@ public class Label {
         act = _act;
     }
 
+    @Override
     public String toString() {
         return "(" + nc + "," + act + ")";
     }

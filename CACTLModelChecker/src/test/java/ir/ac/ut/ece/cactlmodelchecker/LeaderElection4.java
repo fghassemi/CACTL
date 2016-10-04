@@ -55,7 +55,7 @@ public class LeaderElection4 {
                                                         new BasicStateFormula(true), 4))))), 4));
 
         assertTrue("All nodes converge to D",
-                CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint()));
+                CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint(), false));
 
     }
 
@@ -85,7 +85,7 @@ public class LeaderElection4 {
                                                         new BasicStateFormula(true), 4))))), 4));
 
         assertTrue("All nodes converge to D",
-                CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint()));
+                CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint(), false));
 
     }
 
@@ -132,7 +132,7 @@ public class LeaderElection4 {
                 new ImplyStateFormula(sf12, sf22),
                 new BasicActionFormula(true), 4));
         assertTrue("Merge two components",
-                CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint()));
+                CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint(), false));
     }
 
     @Test
@@ -196,7 +196,7 @@ public class LeaderElection4 {
                 new ImplyStateFormula(sf13, sf23),
                 new BasicActionFormula(true), 4));
         assertTrue("Merge three components",
-                CACTLMC.modelCheck(CLTS, p3, new NetworkConstraint()));
+                CACTLMC.modelCheck(CLTS, p3, new NetworkConstraint(), false));
 
     }
 
@@ -214,7 +214,7 @@ public class LeaderElection4 {
                         new ConntivityFormula("D", "A")),
                 new StringActionFormula("finish(D,A)"), p14, 4));
         assertTrue("Missing a leader",
-                CACTLMC.modelCheck(CLTS, p4, new NetworkConstraint()));
+                CACTLMC.modelCheck(CLTS, p4, new NetworkConstraint(), false));
 
     }
 

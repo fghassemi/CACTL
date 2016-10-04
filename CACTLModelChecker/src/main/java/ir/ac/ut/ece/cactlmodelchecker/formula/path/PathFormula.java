@@ -270,4 +270,11 @@ public abstract class PathFormula {
         IOUtils.writeOnDisk(gson.toJson(objects), fileName, IOUtils.FILE_DIRECTORY);
     }
     
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator) {
+        depthIndicator.incrementDepth();
+        phi1.calculateTreeSize(depthIndicator);
+        depthIndicator.incrementDepth();
+        phi2.calculateTreeSize(depthIndicator);
+    };
+    
 }

@@ -1,6 +1,8 @@
 package ir.ac.ut.ece.cactlmodelchecker;
 
 import ir.ac.ut.ece.cactlmodelchecker.formula.state.StateFormula;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
+import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -48,12 +50,10 @@ public class CACTLMC {
 
     }
 
-    public static boolean modelCheck(ConstraintLabeledTransitionSystem CLTS,
-            StateFormula varphi,
-            NetworkConstraint zeta) {
+    public static boolean modelCheck(ConstraintLabeledTransitionSystem CLTS, StateFormula varphi, NetworkConstraint zeta, Boolean counterExampleMode) {
         Set<String> init = CLTS.InitialStates();
         Set<String> allStates = new HashSet(CLTS.vertexSet());
-        Set<String> satisfyingStates = varphi.findState(null, CLTS, zeta, false, null);
+        Set<String> satisfyingStates = varphi.findState(null, CLTS, zeta, counterExampleMode, new TreeDepthIndicator(0));
         System.out.println("The formula " + varphi + " is verified by states " + satisfyingStates);
     	//satisfyingStates.retainAll(init);
         //System.out.println("do all states satisfy the formula? "+satisfyingStates.containsAll(allStates));
@@ -70,6 +70,11 @@ public class CACTLMC {
 //            }
 //        }
         return retVal;
+    }
+
+    public static CounterExample findCounterExample(ConstraintLabeledTransitionSystem CLTS, StateFormula varphi, NetworkConstraint zeta){
+        Set<String> init = CLTS.InitialStates();
+        return varphi.findCounterExample(init, CLTS, zeta, new TreeDepthIndicator(0));
     }
 
     private static ConstraintLabeledTransitionSystem creatCLTS() {

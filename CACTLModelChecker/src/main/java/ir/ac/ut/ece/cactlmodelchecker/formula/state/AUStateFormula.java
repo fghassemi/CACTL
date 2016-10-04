@@ -7,6 +7,7 @@ package ir.ac.ut.ece.cactlmodelchecker.formula.state;
 
 import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
@@ -14,11 +15,15 @@ import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.SCCInspector;
 import ir.ac.ut.ece.cactlmodelchecker.formula.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.formula.path.UntilFormula;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExampleWithTopologies;
 import ir.ac.ut.ece.cactlmodelchecker.utils.IOUtils;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -172,7 +177,12 @@ public class AUStateFormula implements StateFormula {
 //                    System.out.println("over the path" + item.state);
 //                }
                 Set<LabeledTransition> tr = filteredCLTS.incomingEdgesOf(item.state);
-                transitions.addAll(tr);
+                for (LabeledTransition transition : tr) {
+                    if (visitedStatesInBackwardAnalysis.contains(transition.getSrc()) &&
+                            visitedStatesInBackwardAnalysis.contains(transition.getDst())) {
+                        transitions.add(transition);
+                    }
+                }
                 for (Iterator<LabeledTransition> it = tr.iterator(); it.hasNext();) {
                     LabeledTransition tt = it.next();
                     String src = tt.getSrc();
@@ -233,11 +243,9 @@ public class AUStateFormula implements StateFormula {
             ConstraintLabeledTransitionSystem counterExamplesCLTS
                     = new ConstraintLabeledTransitionSystem(
                             counterExamplesLabeledTransitions, counterExamplesStates, counterExamplesInitialStates);
-            Object[] counterExamplesData = new Object[2];
-            counterExamplesData[0] = counterExamplesCLTS;
-            counterExamplesData[1] = topologiesMap;
             Gson gson = new Gson();
-            IOUtils.writeOnDisk(gson.toJson(counterExamplesData), fileName, IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(counterExamplesCLTS), fileName+"-CLTS", IOUtils.FILE_DIRECTORY);
+            IOUtils.writeOnDisk(gson.toJson(topologiesMap), fileName+"-topologiesMap", IOUtils.FILE_DIRECTORY);
         }
 
         Set<String> result = new HashSet<String>();
@@ -261,12 +269,11 @@ public class AUStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+    public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
         String fileName = depthIndicator.depth.toString();
         Gson gson = new Gson();
-        Object[] file = gson.fromJson(IOUtils.readFile(fileName, IOUtils.FILE_DIRECTORY), Object[].class);
-        ConstraintLabeledTransitionSystem counterExamplesCLTS = (ConstraintLabeledTransitionSystem) file[0];
-        Map<String, Set<Integer>> topologiesMap = (Map<String, Set<Integer>>) file[1];
+        ConstraintLabeledTransitionSystem counterExamplesCLTS = gson.fromJson(IOUtils.readFile(fileName+"-CLTS", IOUtils.FILE_DIRECTORY), ConstraintLabeledTransitionSystem.class);
+        Map<String, Set<Integer>> topologiesMap = gson.fromJson(IOUtils.readFile(fileName+"-toplogiesMap", IOUtils.FILE_DIRECTORY), new TypeToken<Map<String, Set<Integer>>>(){}.getType());
         SCCInspector inspector = new SCCInspector(counterExamplesCLTS);
         Set<String>[] SCCs = inspector.ComputeSCCc();
         Set<String> leaves = new HashSet<>();
@@ -281,32 +288,47 @@ public class AUStateFormula implements StateFormula {
             String type = this.getType(counterExamplesCLTS, leafState, CLTS);
             switch (type) {
                 case StateFormula.DEADLOCK:
-                    Set<LabeledTransition> path = new HashSet<>();
-                    Map<String, LabeledTransition> predecessor = new HashMap<>();
-                    Set<String> visitedStates = new HashSet<>();
-                    String initialStateReached = null;
-                    LinkedList<String> stack = new LinkedList<>();
-                    stack.addFirst(leafState);
-                    while (!stack.isEmpty()) {
-                        String state = stack.removeFirst();
-                        visitedStates.add(state);
-                        if (initialStates.contains(state)) {
-                            initialStateReached = state;
-                            break;
-                        }
-                        Set<LabeledTransition> incomingEdges = counterExamplesCLTS.incomingEdgesOf(state);
-                        for (LabeledTransition edge : incomingEdges) {
-                            if (!visitedStates.contains(edge.getSrc())) {
-                                predecessor.put(edge.getSrc(), edge);
-                                stack.addFirst(state);
-                            }
-                        }
-                    }
+                    return findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
                 case StateFormula.NO_VALID_OUTGOING_TRANSITION:
+                    // find the type of the state
+                    // if type one, 
                 case StateFormula.INFINITE_LOOP:
             }
         }
         return null;
+    }
+
+    protected CounterExample findCounterExampleForDeadlockedLeafState(String leafState, Set<String> initialStates, ConstraintLabeledTransitionSystem counterExamplesCLTS, Map<String, Set<Integer>> topologiesMap) {
+        Set<LabeledTransition> path = new HashSet<>();
+        Map<String, LabeledTransition> predecessor = new HashMap<>();
+        Set<String> visitedStates = new HashSet<>();
+        String initialStateReached = null;
+        LinkedList<String> stack = new LinkedList<>();
+        stack.addFirst(leafState);
+        while (!stack.isEmpty()) {
+            String state = stack.removeFirst();
+            visitedStates.add(state);
+            if (initialStates.contains(state)) {
+                initialStateReached = state;
+                break;
+            }
+            Set<LabeledTransition> incomingEdges = counterExamplesCLTS.incomingEdgesOf(state);
+            for (LabeledTransition edge : incomingEdges) {
+                if (!visitedStates.contains(edge.getSrc())) {
+                    predecessor.put(edge.getSrc(), edge);
+                    stack.addFirst(state);
+                }
+            }
+        }
+        // Generating the path for the found counter example
+        String stateInPath = initialStateReached;
+        LinkedList<LabeledTransition> counterExamplePath = new LinkedList<>();
+        while (!stateInPath.equals(leafState)) {
+            LabeledTransition edge = predecessor.get(stateInPath);
+            counterExamplePath.add(edge);
+            stateInPath = edge.getDst();
+        }
+        return new CounterExampleWithTopologies(counterExamplePath, topologiesMap.get(initialStateReached));
     }
 
     private String getType(ConstraintLabeledTransitionSystem counterExamplesCLTS, String state, ConstraintLabeledTransitionSystem initialCLTS) { // check this function
@@ -316,5 +338,13 @@ public class AUStateFormula implements StateFormula {
         } else {
             return StateFormula.INFINITE_LOOP;
         }
+    }
+
+    @Override
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator) {
+        depthIndicator.incrementDepth();
+        arg.phi1.calculateTreeSize(depthIndicator);
+        depthIndicator.incrementDepth();
+        arg.phi2.calculateTreeSize(depthIndicator);
     }
 }

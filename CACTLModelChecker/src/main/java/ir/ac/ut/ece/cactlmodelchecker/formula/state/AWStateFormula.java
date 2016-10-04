@@ -12,12 +12,10 @@ import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.formula.action.StringActionFormula;
 import ir.ac.ut.ece.cactlmodelchecker.formula.path.UnlessFormula;
-import java.io.Serializable;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.Stack;
 
@@ -144,7 +142,12 @@ public class AWStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+    public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

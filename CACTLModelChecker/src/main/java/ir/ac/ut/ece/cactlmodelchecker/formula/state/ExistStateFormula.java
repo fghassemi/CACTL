@@ -10,6 +10,7 @@ import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
 import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.formula.path.PathFormula;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
 import java.util.Set;
 
 /**
@@ -39,8 +40,13 @@ public class ExistStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+    public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator) {
+        arg.calculateTreeSize(depthIndicator);
     }
 
 }

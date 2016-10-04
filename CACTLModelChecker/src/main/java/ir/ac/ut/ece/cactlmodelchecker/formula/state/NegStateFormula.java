@@ -7,13 +7,10 @@ package ir.ac.ut.ece.cactlmodelchecker.formula.state;
 
 import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
-import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
 import ir.ac.ut.ece.cactlmodelchecker.formula.path.PathFormula;
-import java.io.Serializable;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 /**
@@ -56,7 +53,12 @@ public class NegStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+    public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

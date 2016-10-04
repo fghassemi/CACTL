@@ -7,8 +7,8 @@ package ir.ac.ut.ece.cactlmodelchecker.formula.state;
 
 import ir.ac.ut.ece.cactlmodelchecker.utils.TreeDepthIndicator;
 import ir.ac.ut.ece.cactlmodelchecker.ConstraintLabeledTransitionSystem;
-import ir.ac.ut.ece.cactlmodelchecker.Item;
 import ir.ac.ut.ece.cactlmodelchecker.NetworkConstraint;
+import ir.ac.ut.ece.cactlmodelchecker.state.CounterExample;
 import java.util.Set;
 
 /**
@@ -23,8 +23,10 @@ public interface StateFormula {
 
     public Set<String> findState(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, Boolean counterExampleMode, TreeDepthIndicator depthIndicator);
     
-    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator);
+    public CounterExample findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator);
 
     public StateFormula reduce();
+    
+    public void calculateTreeSize(TreeDepthIndicator depthIndicator);
     
 }

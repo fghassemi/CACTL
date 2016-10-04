@@ -7,7 +7,7 @@ package ir.ac.ut.ece.cactlmodelchecker.state;
 
 import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
 import java.io.Serializable;
-import java.util.Set;
+import java.util.LinkedList;
 
 /**
  *
@@ -15,9 +15,22 @@ import java.util.Set;
  */
 public class CounterExample implements Serializable {
 
-    Set<LabeledTransition> path;
+    LinkedList<LabeledTransition> path;
 
-    public CounterExample(Set<LabeledTransition> path) {
+    public CounterExample(LinkedList<LabeledTransition> path) {
         this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (LabeledTransition transition : this.path) {
+            if (this.path.indexOf(transition) != this.path.size()-1) {
+                builder.append(transition.toString()).append(',');
+            } else {
+                builder.append(transition.toString());
+            }
+        }
+        return builder.toString();
     }
 }

@@ -42,7 +42,7 @@ public class LeaderElection3 {
                         new AndStateFormula(new ExistStateFormula(new NextFormula(new StringActionFormula("finish(C,B)"), new BasicStateFormula(true), 3)),
                                 new ExistStateFormula(new NextFormula(new StringActionFormula("finish(C,C)"), new BasicStateFormula(true), 3)))), 3));
 
-        assertTrue("All nodes converge to C", CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint()));
+        assertTrue("All nodes converge to C", CACTLMC.modelCheck(CLTS, p1, new NetworkConstraint(), false));
 
     }
 
@@ -61,7 +61,7 @@ public class LeaderElection3 {
                                 new ExistStateFormula(new NextFormula(new StringActionFormula("finish(C,C)"), new BasicStateFormula(true), 3)))), 3));
         StateFormula p2 = new AWStateFormula(new GenerallyFormula(
                 new ImplyStateFormula(sf12, sf22), new BasicActionFormula(true), 3));
-        assertTrue("Merge two components", CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint()));
+        assertTrue("Merge two components", CACTLMC.modelCheck(CLTS, p2, new NetworkConstraint(), false));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class LeaderElection3 {
                 new ImplyStateFormula(new AndStateFormula(new ExistStateFormula(new NextFormula(new StringActionFormula("finish(C,A)"), new BasicStateFormula(true), 3)),
                                 new ExistStateFormula(new NextFormula(new StringActionFormula("finish(C,C)"), new BasicStateFormula(true), 3))), sf33), 3));
         StateFormula p3 = new AWStateFormula(new GenerallyFormula(new ImplyStateFormula(sf13, sf23), new BasicActionFormula(true), 3));
-        assertTrue("Merge three components", CACTLMC.modelCheck(CLTS, p3, new NetworkConstraint()));
+        assertTrue("Merge three components", CACTLMC.modelCheck(CLTS, p3, new NetworkConstraint(), false));
 
     }
 
@@ -96,7 +96,7 @@ public class LeaderElection3 {
                         new BasicStateFormula(true), 3)));
         StateFormula p4 = new AUStateFormula(new FinallyFormula(new AndTopologyFormula(new ConntivityFormula("A", "C"), new ConntivityFormula("C", "A")),
                 new StringActionFormula("finish(C,A)"), p14, 3));
-        assertTrue("Missing a leader", CACTLMC.modelCheck(CLTS, p4, new NetworkConstraint()));
+        assertTrue("Missing a leader", CACTLMC.modelCheck(CLTS, p4, new NetworkConstraint(), false));
 
     }
 
