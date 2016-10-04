@@ -18,6 +18,7 @@ import ir.ac.ut.ece.cactlmodelchecker.utils.IOUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -137,7 +138,7 @@ public class AUStateFormula implements StateFormula {
         }
 
         /* for counter example mode purposes only */
-        Set<CounterExample> topologiesMap = new HashSet<>();// TODO rename this!
+        HashMap<String, Set<Integer>> topologiesMap = new HashMap<>();// TODO rename this!
         Set<LabeledTransition> counterExamplesLabeledTransitions = new HashSet<>();
         Set<String> counterExamplesInitialStates = new HashSet<>();
         Set<String> counterExamplesStates = new HashSet<>();
@@ -159,14 +160,11 @@ public class AUStateFormula implements StateFormula {
             //System.out.println("backward analysis starts at" + c0);
             Set<String> visitedStatesInBackwardAnalysis = new HashSet<>();
             Set<LabeledTransition> transitions = new HashSet<>();
-            String lastStateInBackwardAnalysis = null, firstStateInBackwardAnalysis = null;
+            String lastStateInBackwardAnalysis = null;
             while (!stack.isEmpty()) {
                 Item item = stack.pop();
                 lastStateInBackwardAnalysis = item.state;
                 visitedStatesInBackwardAnalysis.add(item.state);
-                if (firstStateInBackwardAnalysis == null) {
-                    firstStateInBackwardAnalysis = item.state;
-                }
                 //add to violate : no need as we use range of visited
 //                if (item.state.equals("0")) {
 //                    System.out.println("nahaaara");
@@ -209,16 +207,16 @@ public class AUStateFormula implements StateFormula {
             if (counterExampleMode) {
                 if (T1.contains(lastStateInBackwardAnalysis)) {
                     Set<Integer> newTopologies = null;
-                    for (CounterExample counterExample : topologiesMap) {
-                        if (counterExample.initial.equals(lastStateInBackwardAnalysis)) {
-                            newTopologies = counterExample.topologies;
+                    for (Map.Entry<String, Set<Integer>> topologyMap : topologiesMap.entrySet()) {
+                        if (topologyMap.getKey().equals(lastStateInBackwardAnalysis)) {
+                            newTopologies = topologyMap.getValue();
                             break;
                         }
                     }
                     if (newTopologies == null) {
                         // if state isn't previously visited, we simply add a new
                         // item with the calculated topologies
-                        topologiesMap.add(new CounterExample(lastStateInBackwardAnalysis, firstStateInBackwardAnalysis, topo));
+                        topologiesMap.put(lastStateInBackwardAnalysis, topo);
                     } else {
                         // if we have visited this state before, then we need to
                         // calculate the union of their topologies
@@ -263,7 +261,7 @@ public class AUStateFormula implements StateFormula {
     }
 
     @Override
-    public Set<Item> findCounterExample(Set<String> initial, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) { // TODO implement!
+    public Set<Item> findCounterExample(Set<String> initialStates, ConstraintLabeledTransitionSystem CLTS, NetworkConstraint zeta, TreeDepthIndicator depthIndicator) {
         String fileName = depthIndicator.depth.toString();
         Gson gson = new Gson();
         Object[] file = gson.fromJson(IOUtils.readFile(fileName, IOUtils.FILE_DIRECTORY), Object[].class);
@@ -271,41 +269,39 @@ public class AUStateFormula implements StateFormula {
         Map<String, Set<Integer>> topologiesMap = (Map<String, Set<Integer>>) file[1];
         SCCInspector inspector = new SCCInspector(counterExamplesCLTS);
         Set<String>[] SCCs = inspector.ComputeSCCc();
-        Set<String> leaves = new HashSet<String>();
+        Set<String> leaves = new HashSet<>();
         for (int scc = 0; scc < inspector.count; scc++) {
             Set<String> s_sg = SCCs[scc];
-            boolean hasAUState = false;
-            boolean terminal = true;
-            NetworkConstraint acc = new NetworkConstraint();
-            for (Iterator<String> stateIterator = s_sg.iterator(); stateIterator.hasNext() && !hasAUState && terminal;) {
-                String state = stateIterator.next();
-                if (!counterExamplesCLTS.vertexSet().contains(state) && CLTS.vertexSet().contains(state)) { // check here
-                    hasAUState = true;
-                } else {
-                    Set<LabeledTransition> outgoingEdges = counterExamplesCLTS.outgoingEdgesOf(state);
-                    for (Iterator<LabeledTransition> ti = outgoingEdges.iterator(); ti.hasNext() && terminal;) {
-                        LabeledTransition tr = ti.next();
-                        String dst = tr.getDst();
-                        if (!s_sg.contains(dst)) {
-                            terminal = false;
-                        } else {
-                            acc.update(tr.label.nc);
-                        }
-                    }
-                }
-            }
-            if (!hasAUState && terminal && !arg.OverInvalidPath(acc)) {
-                for (Iterator<String> si = s_sg.iterator(); si.hasNext();) {
-                    leaves.add(si.next());
-                }
+            for (Iterator<String> si = s_sg.iterator(); si.hasNext();) {
+                leaves.add(si.next());
             }
         }
 
         for (String leafState : leaves) {
-            String type = this.getType(counterExamplesCLTS, leafState);
-            switch(type) {
+            String type = this.getType(counterExamplesCLTS, leafState, CLTS);
+            switch (type) {
                 case StateFormula.DEADLOCK:
-                    
+                    Set<LabeledTransition> path = new HashSet<>();
+                    Map<String, LabeledTransition> predecessor = new HashMap<>();
+                    Set<String> visitedStates = new HashSet<>();
+                    String initialStateReached = null;
+                    LinkedList<String> stack = new LinkedList<>();
+                    stack.addFirst(leafState);
+                    while (!stack.isEmpty()) {
+                        String state = stack.removeFirst();
+                        visitedStates.add(state);
+                        if (initialStates.contains(state)) {
+                            initialStateReached = state;
+                            break;
+                        }
+                        Set<LabeledTransition> incomingEdges = counterExamplesCLTS.incomingEdgesOf(state);
+                        for (LabeledTransition edge : incomingEdges) {
+                            if (!visitedStates.contains(edge.getSrc())) {
+                                predecessor.put(edge.getSrc(), edge);
+                                stack.addFirst(state);
+                            }
+                        }
+                    }
                 case StateFormula.NO_VALID_OUTGOING_TRANSITION:
                 case StateFormula.INFINITE_LOOP:
             }
@@ -313,14 +309,12 @@ public class AUStateFormula implements StateFormula {
         return null;
     }
 
-    private String getType(ConstraintLabeledTransitionSystem counterExamplesCLTS, String state) {
-        if (counterExamplesCLTS.outDegreeOf(state) == 0) { // type 2
-            return StateFormula.DEADLOCK;
+    private String getType(ConstraintLabeledTransitionSystem counterExamplesCLTS, String state, ConstraintLabeledTransitionSystem initialCLTS) { // check this function
+        if (counterExamplesCLTS.outDegreeOf(state) == 0) { // type 1 or 2
+            Integer outDegreeOfStateInTheMainCLTS = initialCLTS.outDegreeOf(state);
+            return outDegreeOfStateInTheMainCLTS == 0 ? StateFormula.DEADLOCK : StateFormula.NO_VALID_OUTGOING_TRANSITION;
         } else {
-            Set<LabeledTransition> outgoingEdges = counterExamplesCLTS.outgoingEdgesOf(state);
-            LabeledTransition firstEdge = outgoingEdges.iterator().next();
-//            if (firstEdge.label.)
+            return StateFormula.INFINITE_LOOP;
         }
-        return "";
     }
 }

@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package ir.ac.ut.ece.cactlmodelchecker.formula.state;
+package ir.ac.ut.ece.cactlmodelchecker.state;
 
+import ir.ac.ut.ece.cactlmodelchecker.LabeledTransition;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -13,12 +14,10 @@ import java.util.Set;
  * @author ashkan
  */
 public class CounterExample implements Serializable {
-    public String initial, last;
-    public Set<Integer> topologies;
 
-    public CounterExample(String initial, String last, Set<Integer> topologies) {
-        this.initial = initial;
-        this.last = last;
-        this.topologies = topologies;
+    Set<LabeledTransition> path;
+
+    public CounterExample(Set<LabeledTransition> path) {
+        this.path = path;
     }
 }
