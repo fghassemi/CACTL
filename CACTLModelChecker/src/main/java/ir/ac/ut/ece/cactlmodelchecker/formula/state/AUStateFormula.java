@@ -244,8 +244,8 @@ public class AUStateFormula implements StateFormula {
         if (counterExampleMode) {
             Set<LabeledTransition> counterExamplesTransitions = new HashSet<>();
             for (LabeledTransition transition : allTransitionsInTheWay) {
-                if (counterExamplesStates.contains(transition.getSrc()) &&
-                        counterExamplesStates.contains(transition.getDst())) {
+                if (counterExamplesStates.contains(transition.getSrc())
+                        && counterExamplesStates.contains(transition.getDst())) {
                     counterExamplesTransitions.add(transition);
                 }
             }
@@ -300,12 +300,43 @@ public class AUStateFormula implements StateFormula {
                 case StateFormula.DEADLOCK:
                     return findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
                 case StateFormula.NO_VALID_OUTGOING_TRANSITION:
-                // find the type of the state
-                // if type one, 
+                    for (LabeledTransition outgoingEdge : CLTS.outgoingEdgesOf(leafState)) {
+                        if (!zeta.conforms(outgoingEdge.label.nc)) {
+                            continue;
+                        }
+                        String noValidOutgoingTransitionType = this.getNoValidOutogingTransitionsStateType();
+                        switch (noValidOutgoingTransitionType) {
+                            case StateFormula.NO_INNER_COUNTER_EXAMPLE_NEEDED: {
+                                return findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
+                            }
+                            case StateFormula.COUNTER_EXAMPLE_FOR_FIRST_ARGUMENT_NEEDED: {
+                                Set<String> innerInitialStates = new HashSet<>();
+                                innerInitialStates.add(leafState);
+                                depthIndicator.incrementDepth();
+                                CounterExample innerCounterExample = arg.phi1.findCounterExample(innerInitialStates, CLTS, zeta, depthIndicator);
+                                CounterExample outterCounterExamples = findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
+                                return outterCounterExamples.merge(outterCounterExamples, innerCounterExample);
+                            }
+                            case StateFormula.COUNTER_EXAMPLE_FOR_SECOND_ARGUMENT_NEEDED: {
+                                Set<String> innerInitialStates = new HashSet<>();
+                                innerInitialStates.add(leafState);
+                                depthIndicator.incrementDepth();
+                                arg.phi1.calculateTreeSize(depthIndicator);
+                                depthIndicator.incrementDepth();
+                                CounterExample innerCounterExample = arg.phi2.findCounterExample(innerInitialStates, CLTS, zeta, depthIndicator);
+                                CounterExample outterCounterExamples = findCounterExampleForDeadlockedLeafState(leafState, initialStates, counterExamplesCLTS, topologiesMap);
+                                return outterCounterExamples.merge(outterCounterExamples, innerCounterExample);
+                            }
+                            case StateFormula.COUNTER_EXAMPLE_NEEDED_FOR_BOTH_ARGUMENTS:
+                        }
+                    }
                 case StateFormula.INFINITE_LOOP:
+                    
+                default:
+                    throw new RuntimeException("Something weird happened in the running of the AU counter example generator algorithm.");
             }
         }
-        return null;
+        throw new RuntimeException("There were no leaf states found in the AU counter example generator algorithm.");
     }
 
     protected ConstraintLabeledTransitionSystem loadCLTS(String fileName) {
@@ -373,5 +404,9 @@ public class AUStateFormula implements StateFormula {
         arg.phi1.calculateTreeSize(depthIndicator);
         depthIndicator.incrementDepth();
         arg.phi2.calculateTreeSize(depthIndicator);
+    }
+
+    private String getNoValidOutogingTransitionsStateType() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

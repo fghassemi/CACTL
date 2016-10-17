@@ -43,4 +43,11 @@ public class CounterExample implements Serializable {
         builder.append('}');
         return builder.toString();
     }
+    
+    public CounterExample merge(CounterExample c1, CounterExample c2) {
+        LinkedList<LabeledTransition> mergedPath = new LinkedList<>();
+        mergedPath.addAll(c1.path);
+        mergedPath.addAll(c2.path);
+        return new CounterExample(mergedPath, c1.startingState);
+    }
 }
